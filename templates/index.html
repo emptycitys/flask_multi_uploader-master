@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>webuploader上传</title>
-<script src="./static/jquery-1.11.1.min.js"></script>
+<script src="./static/jquery-3.3.1.min.js"></script>
 <script src="./static/bootstrap/js/bootstrap.min.js"></script>
 <script src="./static/webuploader/webuploader.js"></script>
 <link rel="stylesheet" type="text/css" href="./static/webuploader/webuploader.css">
@@ -24,7 +24,7 @@
     <div id="uploader" class="container">
         <!--用来存放文件信息-->
         <div id="thelist" class="row">
-            <div class="panel panel-primary">
+            <div class="panel panel-primary" id="dndArea">
                 <div class="panel-heading">文件上传<p id="uploaddata" style="float:right">共 个文件，已上传 个文件</p></div>
                 <table class="table table-striped table-bordered" id="uploadTableHeader">
                     <thead>
@@ -77,6 +77,16 @@
                             file.wholeMd5 = val;
                             $('#' + file.id).find("td.state").text("成功获取文件信息...");
                             //获取文件信息后进入下一步
+                      for (let i=0;i<file_list_finish.length;i++)
+                {
+                    console.log(file_list_finish[i]);
+                    if (file_list_finish[i] == (file.wholeMd5+".format")){
+                        //取消分片发送
+                        deferred.reject();
+                        alert(fileName+"已经上传");
+                        break;
+                    }
+                }
                             deferred.resolve();
                         });
                 return deferred.promise();
@@ -86,7 +96,8 @@
                 var deferred = WebUploader.Deferred();
                 block_name = block.file.wholeMd5 + block.chunk;
                 console.log(block_name);
-                for (var i=0;i<file_list_finish.length;i++)
+                console.log(file_list_finish.length)
+                for (let i=0;i<file_list_finish.length;i++)
                 {
                     console.log(file_list_finish[i]);
                     if (file_list_finish[i] == block_name){
@@ -103,18 +114,33 @@
         });
         //点击选择，获取所有文件名称
         $("#picker").on("click",function(){
-            $.ajax({
+                $.ajax({
                 url: "/check",   //对应flask中的路由
                 type: "POST", //请求方法
                 data: 'POST TEST',   //传送的数据
                 dataType: "json", //传送的数据类型
                 success: function (data) {  //成功得到返回数据后回调的函数
                     file_list_finish = data.file_list.toString().split(',');
+                    console.log(file_list_finish)
                     //alert(typeof(file_list_finish));
                 }
-
             })
         });
+        $("#dndArea").on('drop',function () {
+            console.log("拖拽");
+            ev.preventDefault();
+              $.ajax({
+                url: "/check",   //对应flask中的路由
+                type: "POST", //请求方法
+                data: 'POST TEST',   //传送的数据
+                dataType: "json", //传送的数据类型
+                success: function (data) {  //成功得到返回数据后回调的函数
+                    file_list_finish = data.file_list.toString().split(',');
+                    console.log(file_list_finish)
+                    //alert(typeof(file_list_finish));
+                }
+            })
+        })
 
 
         var uploader = WebUploader.create({
@@ -126,6 +152,8 @@
                 id:'#picker',
                 //isWebkitdirectory: true,
             },
+            dnd:"#dndArea",
+            disableGlobalDnd:true,
             auto: false, // 是否选择完即上传
             multiple:true,
             chunked: true,
@@ -137,8 +165,6 @@
             formData: { // 上传分片的http请求中一同携带的数据
                 task_id: fileMd5,
             },
-                
-
                 });
         uploader.addButton({
             id:'#picker2',
