@@ -15,17 +15,27 @@
 #picker {
     display: inline-block;
     line-height: 1.428571429;
-    vertical-align: middle;
     margin: 0 12px 0 0;
 }
 </style>
 </head>
 <body>
     <div id="uploader" class="container">
+          <span id="picker">选择文件</span>
+        <span><button id="btn" class="btn btn-default">开始上传</button></span>
+        <span id="uploadData" >共 个文件，已上传 个文件</span>
+        <button id="progress" class="btn btn-default">查看进度</button>
+            <div id="picker2" class="picker 2">选择文件夹</div>
+        <!--模态框-->
+        <div class="modal">
         <!--用来存放文件信息-->
         <div id="thelist" class="row">
             <div class="panel panel-primary" id="dndArea">
-                <div class="panel-heading">文件上传<p id="uploaddata" style="float:right">共 个文件，已上传 个文件</p></div>
+                <div class="panel-heading" style="text-align: center">
+                    <span style="float: left">文件上传</span>
+                    <span id="uploadData" >共 个文件，已上传 个文件</span>
+                    <i class="close" id="close">&times;</i>
+                </div>
                 <table class="table table-striped table-bordered" id="uploadTableHeader">
                     <thead>
                         <tr>
@@ -45,12 +55,11 @@
                      </div>
 
                 <div class="panel-footer">
-                    <div id="picker">选择文件</div>
-                    <div id="picker2" class="picker 2">选择文件夹</div>
                     <button id="btn" class="btn btn-default">开始上传</button>
                 </div>
             </div>
         </div>
+            </div>
     </div>
     <script type="text/javascript">
         var fileMd5;
@@ -170,6 +179,9 @@
             id:'#picker2',
             isWebkitdirectory: true,
         })
+        uploader.addButton({
+            id:'#filePicker3',
+        })
 
         // 当有文件被添加进队列的时候
         uploader.on('fileQueued', function(file) {
@@ -188,7 +200,7 @@
                     '<td class="size">' + fileSizeStr + '</td>'+
                     '<td class="state">等待上传...</td>'+
                     '<td class="percentage"></td>'+
-                    '<td class="operate"><button name="upload" class="btn btn-warning">开始</button><button name="delete" class="btn btn-error">删除</button></td></tr>');
+                    '<td class="operate"><button name="delete" class="btn btn-error">删除</button></td></tr>');
             map.put(file.id+"",file);
             for (let i=0;i<$("#uploadTable").find("tr").length;i++) {
                 var tbody = $("#uploadTable").find("tr").eq(i).find("td");
@@ -249,7 +261,7 @@
            // file为分块对应的file对象。
            var file = block.file;
            fileMd5 = file.wholeMd5,
-           
+
 
            // 修改data可以控制发送哪些携带数据。
            // 将存在file对象中的md5数据携带发送过去。
@@ -287,10 +299,10 @@
                 text += ',失败'+stats.uploadFailNum+'个文件';
             }
             console.log(text);
-            $("#uploaddata").text(text);
+            $("#uploadData").text(text);
         }
 
-        $("body").on("click","#uploadTable button[name='upload']",function(){
+   {#     $("body").on("click","#uploadTable button[name='upload']",function(){
             flag=$(this).parents("tr.item").attr("flag")^1;
             $(this).parents("tr.item").attr("flag",flag);
             var id=$(this).parents("tr.item").attr("id");
@@ -305,7 +317,7 @@
                 //uploader.removeFile(file);
                 //uploader.getFile(id,true);
             }
-        });
+        });#}
 
         $("body").on("click","#uploadTable button[name='delete']",function(){
             count--;
@@ -315,6 +327,17 @@
             map.remove(id);
             uploadStatus();
         });
+        window.addEventListener("load",() =>{
+            const fillScreen = document.querySelector(".modal");
+            $("#progress").on("click",function () {
+                fillScreen.style.display = "block";
+
+            })
+            $("#close").on("click",function () {
+                fillScreen.style.display = "none";
+
+            })
+        })
     </script>
 </body>
 </html>
