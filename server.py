@@ -15,7 +15,7 @@ year=time.strftime('%Y',time.localtime(time.time()))
 month=time.strftime('%m',time.localtime(time.time()))
 #日期
 day=time.strftime('%d',time.localtime(time.time()))
-
+filepath=os.getcwd()+'/upload'
 fileMonth=os.getcwd()+'/upload'+'/'+year+month
 print(fileMonth)
 if not os.path.exists(fileMonth):
@@ -33,7 +33,7 @@ def index():
 def check_file():
     recv_data = request.get_data()  #得到前端传送的数据
     file_list = []
-    for root, dirs, files in os.walk(file_dir):
+    for root, dirs, files in os.walk(filepath):
         file_list.append(files) #当前路径下所有非目录子文件
     return jsonify({'file_list':file_list }) #返回数据
 
